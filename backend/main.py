@@ -18,15 +18,19 @@ app.add_middleware(
 async def encode_endpoint(image: UploadFile = File(...), message: str = Form(...)):
     # 1. Comprimir con Huffman
     encoded_bits, dictionary = huffman.encode(message)
-    
+
     # 2. Leer imagen y ocultar bits
     img_bytes = await image.read()
     stego_img = stego.encode_message(img_bytes, encoded_bits)
     
+    # Convertimos los bytes de la imagen a una cadena Base64
+    img_b64 = base64.b64encode(stego_img).decode('utf-8')
+
     # En un proyecto real, deberías devolver la imagen Y el diccionario.
     # Por ahora, devolvemos un JSON con el diccionario para que el front lo vea.
     return {
         "message": "Mensaje oculto con éxito",
         "bits": encoded_bits,
-        "dictionary": dictionary
+        "dictionary": dictionary,
+        "image_b64": img_b64
     }
